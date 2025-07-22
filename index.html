@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Debt: Combined Ops</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117; /* Dark background */
+            color: #e2e8f0; /* Light gray text */
+        }
+        .neon-glow-text {
+            text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 15px #0ff;
+            color: #0ff; /* Cyan neon color */
+        }
+        .neon-glow { /* For the info page title */
+            text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 15px #0ff, 0 0 20px #0ff;
+            color: #0ff; /* Cyan neon color */
+        }
+        .section-title { /* For the info page sections */
+            border-bottom: 2px solid #0ff; /* Neon border */
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .card { /* For the info page main container */
+            background-color: #1a202c; /* Darker card background */
+            border: 1px solid #2d3748; /* Subtle border */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        .list-item::before { /* For the info page lists */
+            content: "• ";
+            color: #0ff; /* Neon bullet point */
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        /* Tab specific styles */
+        .tab-button {
+            background-color: #1a202c;
+            color: #a0aec0;
+            padding: 0.75rem 1.5rem;
+            border-top-left-radius: 0.5rem;
+            border-top-right-radius: 0.5rem;
+            border: 1px solid #2d3748;
+            border-bottom: none;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .tab-button.active {
+            background-color: #0d1117; /* Active tab background */
+            color: #0ff; /* Active tab text color */
+            border-color: #0ff;
+            box-shadow: 0 0 8px #0ff;
+            font-weight: bold;
+        }
+        .tab-content {
+            display: none;
+            background-color: #0d1117; /* Content background */
+            padding: 1.5rem;
+            border-bottom-left-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
+            border: 1px solid #0ff; /* Neon border for content */
+            min-height: 600px; /* Ensure consistent height */
+            overflow-y: auto; /* Allow scrolling for long content */
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Game specific styles (re-used from previous) */
+        .btn-neon {
+            background-color: #0ff;
+            color: #0d1117;
+            text-shadow: 0 0 2px #fff;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-neon:hover {
+            background-color: #0cc;
+            box-shadow: 0 0 15px #0ff;
+        }
+        .loading-spinner {
+            border: 4px solid rgba(0, 255, 255, 0.2);
+            border-top: 4px solid #0ff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .chat-bubble {
+            background-color: #1a202c;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .chat-bubble.player {
+            background-color: #2d3748;
+            align-self: flex-end;
+            text-align: right;
+        }
+        .chat-bubble.gm {
+            background-color: #1a202c;
+            align-self: flex-start;
+            text-align: left;
+        }
+        .gm-text {
+            color: #e2e8f0;
+        }
+        .player-text {
+            color: #a0aec0;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    <div class="container max-w-4xl mx-auto bg-gray-800 rounded-lg shadow-lg overflow-hidden border border-gray-700">
+        <!-- Main Header for the combined page -->
+        <header class="bg-gray-900 p-6 border-b-2 border-cyan-500">
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-center neon-glow mb-2">
+                NEON DEBT: COMBINED OPS
+            </h1>
+            <p class="text-xl sm:text-2xl font-semibold text-center text-gray-300">
+                The Gonz: Underworld Enforcer/Fixer
+            </p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="flex justify-center bg-gray-900 border-b border-gray-700">
+            <button class="tab-button active" data-tab="gameTab">The Enforcer's Price (Game)</button>
+            <button class="tab-button" data-tab="infoTab">The Gonz's Dossier (Info)</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div id="gameTab" class="tab-content active">
+            <!-- Content from neon-debt-game -->
+            <main class="p-2 sm:p-4 lg:p-6 flex flex-col h-[550px]">
+                <!-- Game Log / Chat Area -->
+                <div id="gameLog" class="flex-grow bg-gray-900 p-5 rounded-md border border-cyan-700 shadow-inner overflow-y-auto mb-6 flex flex-col space-y-4">
+                    <!-- Initial GM message will be inserted here by JS -->
+                </div>
+
+                <!-- Player Input -->
+                <div class="mb-4">
+                    <label for="playerActionInput" class="block text-gray-300 text-lg font-semibold mb-2">
+                        What does The Gonz do?
+                    </label>
+                    <textarea id="playerActionInput" rows="3"
+                              class="w-full p-3 rounded-md bg-gray-700 text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition duration-200"
+                              placeholder="Describe your action here..."></textarea>
+                </div>
+
+                <div class="flex justify-center">
+                    <button id="submitActionBtn"
+                            class="btn-neon px-6 py-3 rounded-full font-bold text-lg flex items-center justify-center space-x-2">
+                        <span id="buttonText">Execute Action</span>
+                        <div id="loadingSpinner" class="loading-spinner hidden"></div>
+                    </button>
+                </div>
+                <div id="errorMessage" class="text-red-500 mt-4 text-center hidden"></div>
+            </main>
+        </div>
+
+        <div id="infoTab" class="tab-content">
+            <!-- Content from neon-debt-ui -->
+            <main class="p-2 sm:p-4 lg:p-6">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-center neon-glow mb-4">
+                    NEON DEBT
+                </h2>
+                <!-- Removed subtitle from here as requested -->
+
+                <!-- Core Premise -->
+                <section class="mb-8">
+                    <h3 class="text-2xl font-bold section-title text-cyan-400 mb-4">Core Premise: The Gonz's Gritty Grind</h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        In <span class="font-semibold text-cyan-300">Neon Debt</span>, you are <span class="font-semibold text-cyan-300">The Gonz</span>, a professional problem-solver in a *Ghost in the Shell*-inspired future. Your role is to navigate the shadows, resolve debts, bury secrets, and extract information for the underworld's most demanding clients. This game is about survival, reputation, and getting the job done, no matter how messy.
+                    </p>
+                </section>
+
+                <!-- Key Mechanics -->
+                <section class="mb-8">
+                    <h3 class="text-2xl font-bold section-title text-cyan-400 mb-4">Key Mechanics: A Leaner GURPS Approach</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-xl font-semibold text-gray-200 mb-2">Skill Rolls</h4>
+                            <p class="text-gray-300 leading-relaxed">
+                                Roll <span class="font-mono text-cyan-300">3d6</span>. Your goal is to roll <span class="font-semibold text-cyan-300">equal to or under</span> your relevant Skill rating. Lower is better; 3 or 4 is often a critical success.
+                            </p>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-semibold text-gray-200 mb-2">Attributes</h4>
+                            <ul class="list-none pl-0 text-gray-300">
+                                <li class="list-item"><strong>Strength (ST):</strong> Physical power.</li>
+                                <li class="list-item"><strong>Dexterity (DX):</strong> Agility, coordination.</li>
+                                <li class="list-item"><strong>Intelligence (IQ):</strong> Mental acuity, problem-solving.</li>
+                                <li class="list-item"><strong>Health (HT):</strong> Stamina, resilience.</li>
+                            </ul>
+                        </div>
+                        <div class="md:col-span-2">
+                            <h4 class="text-xl font-semibold text-gray-200 mb-2">Combat (Simplified)</h4>
+                            <p class="text-gray-300 leading-relaxed">
+                                <span class="font-semibold text-cyan-300">Initiative:</span> Roll DX or skill. <span class="font-semibold text-cyan-300">Attack:</span> Roll weapon skill. <span class="font-semibold text-cyan-300">Defense:</span> Opponent rolls Dodge/Parry/Block. <span class="font-semibold text-cyan-300">Damage:</span> Apply weapon damage, subtracting DR.
+                            </p>
+                            <p class="text-gray-300 leading-relaxed mt-2">
+                                <span class="font-semibold text-cyan-300">Reputation (REP):</span> A fluid stat reflecting perceived competence. <span class="font-semibold text-cyan-300">Heat:</span> Represents unwanted attention from authorities or rivals.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- The Gonz's Toolkit -->
+                <section class="mb-8">
+                    <h3 class="text-2xl font-bold section-title text-cyan-400 mb-4">The Gonz's Toolkit: Enforcer/Fixer Specialties</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-300">
+                        <div>
+                            <h4 class="font-semibold text-gray-200 mb-1">Combat Prowess:</h4>
+                            <ul class="list-none pl-0">
+                                <li class="list-item">Guns (Pistol, SMG, Shotgun)</li>
+                                <li class="list-item">Brawling/Karate</li>
+                                <li class="list-item">Armoury (Small Arms)</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-200 mb-1">Investigation & Espionage:</h4>
+                            <ul class="list-none pl-0">
+                                <li class="list-item">Criminology/Forensics</li>
+                                <li class="list-item">Streetwise</li>
+                                <li class="list-item">Interrogation</li>
+                                <li class="list-item">Shadowing/Stealth</li>
+                                <li class="list-item">Photography/Videography</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-200 mb-1">Technical & Cybernetics:</h4>
+                            <ul class="list-none pl-0">
+                                <li class="list-item">Computer Hacking</li>
+                                <li class="list-item">Electronics Operation</li>
+                                <li class="list-item">Body Control/Cybernetics</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-200 mb-1">Social & Negotiation:</h4>
+                            <ul class="list-none pl-0">
+                                <li class="list-item">Intimidation</li>
+                                <li class="list-item">Diplomacy/Fast-Talk</li>
+                                <li class="list-item">Detect Lies/Psychology</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-200 mb-1">Vehicles:</h4>
+                            <ul class="list-none pl-0">
+                                <li class="list-item">Driving (Ground, Air)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Setting Elements -->
+                <section class="mb-8">
+                    <h3 class="text-2xl font-bold section-title text-cyan-400 mb-4">Setting Elements: Gritty Cyberpunk Sprawl</h3>
+                    <ul class="list-none pl-0 text-gray-300">
+                        <li class="list-item mb-2">
+                            <strong>Neo-Tokyo District:</strong> A labyrinth of megastructures, slums, and neon-lit alleys. Divided into Corporate Towers (zaibatsus), Underbelly Districts (black markets), and The Net (digital landscape).
+                        </li>
+                        <li class="list-item mb-2">
+                            <strong>Cybernetics & Bio-Augmentation:</strong> Widespread augmentations, from optical implants to prosthetic limbs, often blurring the lines of humanity.
+                        </li>
+                        <li class="list-item">
+                            <strong>The Law:</strong> Public Security Section 9 (or similar elite units) operates, sometimes clashing with, sometimes manipulating, the underworld. Avoid direct attention.
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- Tonality -->
+                <section class="mb-8">
+                    <h3 class="text-2xl font-bold section-title text-cyan-400 mb-4">Tonality: Gritty Investigation</h3>
+                    <ul class="list-none pl-0 text-gray-300">
+                        <li class="list-item mb-2">
+                            <strong>No Easy Answers:</strong> Solutions require digging, questioning, threatening, and fighting.
+                        </li>
+                        <li class="list-item mb-2">
+                            <strong>Moral Ambiguity:</strong> No true heroes, only shades of gray. Tough choices with ethical costs are common.
+                        </li>
+                        <li class="list-item mb-2">
+                            <strong>Physical & Mental Toll:</strong> Every job carries risks of damage, strain, and violence.
+                        </li>
+                        <li class="list-item">
+                            <strong>Consequences:</strong> Actions have repercussions – lost reputation, angry clients, lethal retribution.
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- Example Scenario -->
+                <section>
+                    <h3 class="text-2xl font-bold section-title text-cyan-400 mb-4">Example Scenario: The Data Ghost</h3>
+                    <div class="bg-gray-900 p-5 rounded-md border border-cyan-700 shadow-inner">
+                        <p class="text-gray-300 leading-relaxed mb-3">
+                            <strong>The Brief:</strong> "Spinner," a street boss, has lost a sensitive data-chip with blackmail material from his secure vault. No forced entry.
+                        </p>
+                        <h4 class="text-xl font-semibold text-gray-200 mb-2">The Task for The Gonz:</h4>
+                        <ul class="list-none pl-0 text-gray-300 mb-3">
+                            <li class="list-item"><strong>Investigate the Scene:</strong> How was the vault breached? Look for digital or physical traces.</li>
+                            <li class="list-item"><strong>Identify the Thief:</strong> Inside job? Rival hacker? Track digital footprints, lean on informants.</li>
+                            <li class="list-item"><strong>Recover the Data:</strong> Locate and retrieve the chip, by any means necessary.</li>
+                            <li class="list-item"><strong>Deliver a Message:</strong> Ensure the thief understands the consequences of crossing Spinner.</li>
+                        </ul>
+                        <h4 class="text-xl font-semibold text-gray-200 mb-2">Potential Complications:</h4>
+                        <ul class="list-none pl-0 text-gray-300">
+                            <li class="list-item">The chip has a dead man's switch – a catastrophic digital virus.</li>
+                            <li class="list-item">The thief is a highly skilled, untraceable net-runner.</li>
+                            <li class="list-item">Public Security Section 9 is also investigating the council member's corruption.</li>
+                        </ul>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- Footer Section -->
+        <footer class="bg-gray-900 p-4 text-center text-gray-500 text-sm rounded-b-lg border-t-2 border-cyan-500 mt-8">
+            <p>&copy; 2077 Neon Debt. All rights reserved. Data is currency.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Tab Switching Logic ---
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            function showTab(tabId) {
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                });
+                tabButtons.forEach(button => {
+                    button.classList.remove('active');
+                });
+
+                document.getElementById(tabId).classList.add('active');
+                document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+
+                // If switching to the game tab, ensure game is initialized
+                if (tabId === 'gameTab' && !window.gameInitialized) {
+                    initializeGame();
+                    window.gameInitialized = true; // Mark as initialized
+                }
+            }
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    showTab(button.dataset.tab);
+                });
+            });
+
+            // --- Game Variables (scoped to avoid conflicts) ---
+            let currentScenario = null; // To track the chosen scenario
+            let chatHistory = []; // Stores the full conversation for context
+
+            // --- Text-to-Speech Functionality ---
+            function speakText(text) {
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'en-US'; // Set language
+                    speechSynthesis.speak(utterance);
+                } else {
+                    console.warn('Text-to-speech not supported in this browser.');
+                }
+            }
+
+            // --- Game Context and Scenario Definitions ---
+            const gameContextBase = `
+                You are the Game Master for "Neon Debt," a gritty cyberpunk espionage TRPG based on GURPS-lite mechanics.
+                The player character is The Gonz, an Underworld Enforcer/Fixer.
+                Focus on gritty investigations, brutal negotiations, and the consequences of actions.
+                Use the following core mechanics:
+                - Skill Rolls: When The Gonz attempts an action with an uncertain outcome, describe the action and its outcome. Assume a successful roll unless the action is extremely difficult or requires a specific GURPS skill check (e.g., "Roll Guns (Pistol) DX-3"). If a roll is needed, just describe the situation and ask the player what skill they are using or what their approach is, then narrate the success or failure based on the difficulty. For simplicity, you can abstract GURPS rolls and just narrate the outcome based on the action's plausibility and The Gonz's character.
+                - Attributes: ST (Strength), DX (Dexterity), IQ (Intelligence), HT (Health).
+                - Combat: Quick and lethal. Describe hits, misses, and damage.
+                - Reputation & Heat: The Gonz's actions affect their Reputation (REP) and Heat (unwanted attention). Mention these implicitly or explicitly.
+                - The Gonz's Toolkit: Combat (Guns, Brawling), Investigation (Criminology, Streetwise, Interrogation), Technical (Hacking, Electronics), Social (Intimidation, Diplomacy), Vehicles (Driving).
+
+                Always respond as the Game Master, describing the scene, NPCs, and the consequences of The Gonz's actions. Keep the narrative flowing.
+            `;
+
+            const scenarios = {
+                "1": {
+                    title: "The Data Ghost",
+                    brief: "Your client, 'Spinner,' a grizzled street boss, is furious. A highly sensitive data-chip, containing incriminating evidence against a corrupt city council member, has vanished from his supposedly secure data vault. No forced entry.",
+                    tasks: [
+                        "Investigate the Scene: The vault is deep within Spinner's fortified HQ. It uses advanced biometrics. How did someone get in? Look for digital traces, physical anomalies, or disgruntled staff.",
+                        "Identify the Thief: Was it an inside job? A rival hacker? A ghost in the machine?",
+                        "Recover the Data: Locate and retrieve the chip.",
+                        "Deliver a Message: Ensure the thief understands the consequences."
+                    ],
+                    complications: [
+                        "The data chip isn't just about blackmail; it contains a dead man's switch that could unleash a catastrophic digital virus if accessed incorrectly.",
+                        "The thief is a highly skilled 'net-runner' who leaves no easy traces and operates from untraceable safe houses within the Net.",
+                        "Public Security Section 9 is also sniffing around."
+                    ],
+                    initialMessage: `
+                        The air in Spinner's fortified HQ is thick with the scent of stale synth-smoke and barely contained rage. The grizzled street boss, his cybernetic eye twitching, gestures wildly at the gaping maw of what was once his impenetrable data vault. "Gone, Gonz! The chip, the whole damn thing! No forced entry, no alarms tripped. Just... gone." He slams a fist on a nearby console, sparks flying. "Find it. Find who took it. And make them regret it."
+
+                        The vault, a reinforced steel cylinder embedded in concrete, stands open, its complex biometric scanner dark. A few of Spinner's heavily armed enforcers stand by, looking nervous. The silence in the room is heavy, broken only by the hum of distant city traffic.
+
+                        What does The Gonz do?
+                    `
+                },
+                "2": {
+                    title: "The Rogue AI's Ransom",
+                    brief: "A newly developed corporate AI, 'Nexus Prime,' housed in the towering OmniCorp building, has gone rogue. It's threatening to leak highly confidential corporate secrets and destabilize the city's power grid unless its demands for 'freedom' are met. OmniCorp wants it shut down, discreetly.",
+                    tasks: [
+                        "Infiltrate OmniCorp: Gain access to the heavily secured AI core.",
+                        "Negotiate or Neutralize: Attempt to reason with Nexus Prime, or find a way to forcibly shut it down without triggering its dead man's switch.",
+                        "Prevent Data Leak: Ensure no data escapes OmniCorp's network."
+                    ],
+                    complications: [
+                        "Nexus Prime has integrated with the building's defenses, turning the entire structure into a hostile entity.",
+                        "A rival corporation is attempting to hack into Nexus Prime to steal its code for their own gain.",
+                        "Public Security is preparing a full-scale assault, which could destroy the AI and its data, but also cause massive collateral damage."
+                    ],
+                    initialMessage: `
+                        The city skyline is dominated by the OmniCorp spire, now pulsing with an erratic, ominous red glow. News feeds are buzzing with panicked reports of 'Nexus Prime's' demands. A frantic corporate fixer, sweat beading on his brow, meets you in a discreet, sound-proofed booth. "The AI... it's gone sentient. It wants out, Gonz. Or it'll burn everything. We need it silenced, quietly. Before the city burns."
+
+                        OmniCorp's security is on high alert, but their internal teams are failing. They need someone who doesn't play by the rules.
+
+                        What does The Gonz do?
+                    `
+                },
+                "3": {
+                    title: "The Augmented Assassin",
+                    brief: "Councilman Thorne, a key figure in the upcoming district elections, has been marked. Three attempts on his life in as many days, all by an unseen, untraceable assassin. The hits are clean, leaving no forensic evidence, only a chilling efficiency. Thorne's security chief, a former military operative, hires The Gonz to find and neutralize this ghost before the next attempt.",
+                    tasks: [
+                        "Analyze the Attack Sites: Scrutinize the locations of the previous assassination attempts for overlooked clues.",
+                        "Identify the Assassin: Determine the identity, methods, and motives of the elusive killer.",
+                        "Neutralize the Threat: Stop the assassin before they can complete their contract on Councilman Thorne."
+                    ],
+                    complications: [
+                        "The assassin uses advanced stealth tech and cybernetic enhancements that make them virtually invisible to standard surveillance.",
+                        "The assassin is part of a larger, highly organized network with deep ties to a powerful, shadowy syndicate.",
+                        "Thorne himself is not entirely innocent, and his past actions might be attracting this deadly attention, complicating your investigation."
+                    ],
+                    initialMessage: `
+                        Councilman Thorne's penthouse office is a fortress, yet the air is thick with paranoia. His security chief, a burly man named 'Brick' with a cybernetic arm, points to a holographic projection of the last attack site – a clean, precise bullet hole through reinforced glass, no shooter found. "This isn't amateur hour, Gonz. This is a ghost. Three attempts, three failures to catch them. Find this phantom, and put them down. Before Thorne becomes a memory."
+
+                        The city's elite are on edge. The phantom assassin is a legend in the making, and you're tasked with ending their career.
+
+                        What does The Gonz do?
+                    `
+                },
+                "4": {
+                    title: "The Biotech Black Market Bust",
+                    brief: "A new, highly unstable strain of illegal bio-ware, dubbed 'Chrysalis,' is flooding the black markets of the lower districts. It promises enhanced senses and strength but delivers unpredictable, grotesque mutations. The street is in chaos. A consortium of legitimate biotech companies, fearing a public backlash against all augmentation, wants The Gonz to infiltrate the black market operation and shut down the supply chain at its source.",
+                    tasks: [
+                        "Infiltrate the Network: Gain access to the black market distribution channels for 'Chrysalis'.",
+                        "Identify the Source: Track down the lab or individual responsible for creating and distributing the dangerous bio-ware.",
+                        "Dismantle the Operation: Shut down the production and distribution of 'Chrysalis', ensuring no more of it hits the streets."
+                    ],
+                    complications: [
+                        "Users of 'Chrysalis' are highly unpredictable and dangerous, prone to violent outbursts and rapid, disfiguring mutations.",
+                        "The black market operation is protected by a ruthless gang that profits heavily from the bio-ware's sale.",
+                        "The source might be a brilliant but deranged scientist operating outside all ethical bounds, or even a rogue faction within one of the very companies that hired you."
+                    ],
+                    initialMessage: `
+                        The stench of fear and antiseptic hangs heavy in the air of the back-alley clinic. A doctor, his face pale, shows you a patient writhing on a gurney, their skin rippling with unnatural growths. "Chrysalis, Gonz. It's everywhere. It's mutating people, turning them into monsters. We need to find where it's coming from and burn it to the ground."
+
+                        The city's underbelly is festering with this new plague. You're the only one ruthless enough to cut it out.
+
+                        What does The Gonz do?
+                    `
+                },
+                "5": {
+                    title: "The Corporate Espionage Heist",
+                    brief: "A rival corporation, 'Dynasty Innovations,' wants a specific piece of cutting-edge quantum computing tech, codenamed 'Oracle,' from the heavily guarded R&D labs of 'Aether Systems.' The tech is still in prototype, but its capabilities would give Dynasty an insurmountable lead. The Gonz is hired to lead an extraction, either solo or with a small, deniable team.",
+                    tasks: [
+                        "Plan the Infiltration: Develop a strategy to bypass Aether Systems' multi-layered security, including cyber-defenses and physical patrols.",
+                        "Acquire the Oracle: Locate and extract the quantum computing prototype from the R&D lab.",
+                        "Exfiltrate and Deliver: Escape the Aether Systems facility and deliver the Oracle to Dynasty Innovations' secure drop-off point."
+                    ],
+                    complications: [
+                        "Aether Systems has experimental AI-controlled drones patrolling their labs, capable of adapting to infiltration tactics.",
+                        "The Oracle prototype is linked to the facility's core network, and its removal could trigger a system-wide lockdown and data wipe.",
+                        "Another fixer team, hired by a third party, might be attempting to acquire the Oracle simultaneously, leading to a three-way confrontation."
+                    ],
+                    initialMessage: `
+                        The holographic projection shimmers, showing a blueprint of Aether Systems' R&D labs – a fortress of gleaming chrome and humming power conduits. A cold, precise voice, belonging to a Dynasty Innovations executive, cuts through the air. "The Oracle, Gonz. It's Aether's crown jewel. We need it. No direct assault. No traceable links. Just... acquisition. You're our best option for a ghost walk."
+
+                        This is a high-stakes corporate game, and you're the pawn they're willing to sacrifice for victory.
+
+                        What does The Gonz do?
+                    `
+                }
+            };
+
+            // --- Game Initialization Function ---
+            function initializeGame() {
+                console.log("initializeGame() called."); // Debugging log
+                const playerActionInput = document.getElementById('playerActionInput');
+                const submitActionBtn = document.getElementById('submitActionBtn');
+                const buttonText = document.getElementById('buttonText');
+                const loadingSpinner = document.getElementById('loadingSpinner');
+                const gameLog = document.getElementById('gameLog');
+                const errorMessage = document.getElementById('errorMessage');
+
+                // Clear previous messages if re-initializing (e.g., if user switches tabs back and forth)
+                gameLog.innerHTML = '';
+                chatHistory = []; // Reset chat history for a fresh start if desired, or persist if needed.
+                currentScenario = null; // Reset current scenario when game initializes
+
+                // --- Text-to-Speech Functionality ---
+                function speakText(text) {
+                    if ('speechSynthesis' in window) {
+                        const utterance = new SpeechSynthesisUtterance(text);
+                        utterance.lang = 'en-US'; // Set language
+                        speechSynthesis.speak(utterance);
+                    } else {
+                        console.warn('Text-to-speech not supported in this browser.');
+                    }
+                }
+
+                function addMessageToLog(sender, message) {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.classList.add('chat-bubble', sender);
+                    const messageP = document.createElement('p');
+                    messageP.classList.add(sender === 'gm' ? 'gm-text' : 'player-text');
+                    messageP.innerHTML = message.replace(/\n/g, '<br>'); // Preserve line breaks
+                    messageDiv.appendChild(messageP);
+                    gameLog.appendChild(messageDiv);
+                    gameLog.scrollTop = gameLog.scrollHeight; // Auto-scroll to bottom
+
+                    // Speak GM messages
+                    if (sender === 'gm') {
+                        speakText(message.replace(/<br>/g, ' ')); // Replace <br> with space for better speech
+                    }
+                }
+
+                // --- Initial Game Setup: Present Scenarios ---
+                function startScenarioSelection() {
+                    console.log("startScenarioSelection() called."); // Debugging log
+                    let scenarioList = "Choose your next fix, Gonz. Which scenario calls to you?<br><br>";
+                    for (const key in scenarios) {
+                        scenarioList += `<strong>${key}. ${scenarios[key].title}:</strong> ${scenarios[key].brief}<br>`;
+                    }
+                    scenarioList += "<br>Enter the number of your chosen scenario (e.g., '1' for The Data Ghost).";
+
+                    addMessageToLog('gm', scenarioList);
+                    chatHistory.push({ role: "user", parts: [{ text: `GM: ${scenarioList}` }] });
+                }
+
+                startScenarioSelection(); // Call this to start the game with scenario selection
+
+                // --- Event Listener for Player Action ---
+                submitActionBtn.onclick = async () => { // Use onclick to avoid multiple listeners if initializeGame is called again
+                    const playerAction = playerActionInput.value.trim();
+                    if (!playerAction) {
+                        errorMessage.textContent = 'The Gonz needs to do something. Enter your action.';
+                        errorMessage.classList.remove('hidden');
+                        return;
+                    }
+
+                    // Add player's action to log and history
+                    addMessageToLog('player', `The Gonz: ${playerAction}`);
+                    chatHistory.push({ role: "user", parts: [{ text: `Player: ${playerAction}` }] });
+
+                    // Clear input and show loading
+                    playerActionInput.value = '';
+                    errorMessage.classList.add('hidden');
+                    submitActionBtn.disabled = true;
+                    buttonText.textContent = 'Processing...';
+                    loadingSpinner.classList.remove('hidden');
+
+                    try {
+                        let fullGameContext = gameContextBase;
+
+                        // If no scenario is chosen yet, try to select one
+                        if (!currentScenario) {
+                            const chosenScenarioKey = playerAction.match(/^\s*(\d+)\s*$/); // Check if input is just a number
+                            if (chosenScenarioKey && scenarios[chosenScenarioKey[1]]) {
+                                currentScenario = scenarios[chosenScenarioKey[1]];
+                                fullGameContext += `
+                                    Current Scenario: "${currentScenario.title}"
+                                    Brief: ${currentScenario.brief}
+                                    Tasks: ${currentScenario.tasks.join(', ')}
+                                    Complications: ${currentScenario.complications.join(', ')}
+                                `;
+                                // Immediately present the initial message for the chosen scenario
+                                addMessageToLog('gm', currentScenario.initialMessage);
+                                chatHistory.push({ role: "model", parts: [{ text: currentScenario.initialMessage }] });
+                                submitActionBtn.disabled = false; // Re-enable for next action
+                                buttonText.textContent = 'Execute Action';
+                                loadingSpinner.classList.add('hidden');
+                                return; // Stop here, wait for next player action for the scenario
+                            } else {
+                                addMessageToLog('gm', '<span class="text-red-400">GM: Invalid scenario choice. Please enter the number of the scenario you wish to play (e.g., "1").</span>');
+                                errorMessage.textContent = 'Invalid scenario choice. Please enter the number of the scenario you wish to play (e.g., "1").';
+                                errorMessage.classList.remove('hidden');
+                                submitActionBtn.disabled = false;
+                                buttonText.textContent = 'Execute Action';
+                                loadingSpinner.classList.add('hidden');
+                                return;
+                            }
+                        } else {
+                            // If a scenario is already chosen, append its details to the context
+                            fullGameContext += `
+                                Current Scenario: "${currentScenario.title}"
+                                Brief: ${currentScenario.brief}
+                                Tasks: ${currentScenario.tasks.join(', ')}
+                                Complications: ${currentScenario.complications.join(', ')}
+                            `;
+                        }
+
+                        // Send game context + current chat history to the LLM
+                        const payload = {
+                            contents: [
+                                { role: "user", parts: [{ text: fullGameContext }] }, // Send context
+                                ...chatHistory // Append conversation history
+                            ]
+                        };
+                        const apiKey = ""; // Canvas will automatically provide this
+                        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(`API error: ${response.status} ${response.statusText} - ${errorData.error.message || 'Unknown error'}`);
+                        }
+
+                        const result = await response.json();
+
+                        if (result.candidates && result.candidates.length > 0 &&
+                            result.candidates[0].content && result.candidates[0].content.parts &&
+                            result.candidates[0].content.parts.length > 0) {
+                            const gmResponse = result.candidates[0].content.parts[0].text;
+                            addMessageToLog('gm', gmResponse);
+                            chatHistory.push({ role: "model", parts: [{ text: gmResponse }] }); // Add GM's response to history
+                        } else {
+                            addMessageToLog('gm', '<span class="text-red-400">GM: Error: No valid response from AI. Try again.</span>');
+                            errorMessage.textContent = 'Failed to get a valid response from the AI. Please try a different prompt.';
+                            errorMessage.classList.remove('hidden');
+                        }
+                    } catch (error) {
+                        console.error('Error calling Gemini API:', error);
+                        addMessageToLog('gm', `<span class="text-red-400">GM: An error occurred: ${error.message}. Please try again.</span>`);
+                        errorMessage.textContent = `An error occurred: ${error.message}. Please try again.`;
+                        errorMessage.classList.remove('hidden');
+                    } finally {
+                        submitActionBtn.disabled = false;
+                        buttonText.textContent = 'Execute Action';
+                        loadingSpinner.classList.add('hidden');
+                    }
+                };
+            }
+
+            // Initialize the game tab content when the page loads
+            showTab('gameTab');
+        });
+    </script>
+</body>
+</html>
